@@ -34,14 +34,7 @@ const Profile = () => {
   const [isPopupVisible, setPopupVisibility] = useState(false);
   const [isAddPopupVisible, setAddPopupVisibility] = useState(false);
   const [loadPannelVisible, setLoadPannelVisible] = useState(false);
-  const [pass, setPass] = useState({
-    accountTypeID: 0,
-    companyID: 0,
-    password: '',
-    title: '',
-    username: '',
-    url: '',
-  });
+  const [pass, setPass] = useState();
 
   const vault = useSelector(selectVault);
   const companies = useSelector(selectCompanies);
