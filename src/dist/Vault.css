@@ -1,0 +1,9 @@
+.item-title {
+  cursor: pointer;
+}
+
+.item-title:hover {
+  color: blue;
+  text-decoration: underline;
+}
+/*# sourceMappingURL=Vault.css.map */

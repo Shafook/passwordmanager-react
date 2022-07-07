@@ -1,0 +1,44 @@
+import React from 'react';
+import { Switch, Route, Redirect } from 'react-router-dom';
+import { SingleCard } from './layouts';
+import {
+  LoginForm,
+  ResetPasswordForm,
+  ChangePasswordForm,
+  CreateAccountForm,
+} from './components';
+import ConfirmEmail from './pages/ConfirmEmail/ConfirmEmail';
+
+export default function UnauthenticatedContent() {
+  return (
+    <Switch>
+      <Route exact path='/login'>
+        <SingleCard title='Sign In'>
+          <LoginForm />
+        </SingleCard>
+      </Route>
+      <Route exact path='/create-account'>
+        <SingleCard title='Sign Up'>
+          <CreateAccountForm />
+        </SingleCard>
+      </Route>
+      <Route exact path='/reset-password'>
+        <SingleCard
+          title='Reset Password'
+          description='Please enter the email address that you used to register, and we will send you a link to reset your password via Email.'
+        >
+          <ResetPasswordForm />
+        </SingleCard>
+      </Route>
+      <Route exact path='/change-password'>
+        <SingleCard title='Change Password'>
+          <ChangePasswordForm />
+        </SingleCard>
+      </Route>
+      <Route exact path='/confirmemail'>
+        <ConfirmEmail />
+      </Route>
+      <Redirect to={'/login'} />
+    </Switch>
+  );
+}

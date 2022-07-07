@@ -1,0 +1,259 @@
+import React, { useEffect, useState } from 'react';
+import DataGrid, {
+  Column,
+  Paging,
+  Pager,
+  Selection,
+  Editing,
+  Toolbar,
+  Item,
+} from 'devextreme-react/data-grid';
+import { Button } from 'devextreme-react/button';
+import CustomStore from 'devextreme/data/custom_store';
+import { LoadPanel } from 'devextreme-react/load-panel';
+import './Accounts.scss';
+import { useDispatch, useSelector } from 'react-redux';
+import { setPasswordMode } from '../../features/form/formSlice';
+import {
+  addNewPassword,
+  deletePassword,
+  fetchPasswordById,
+  selectVault,
+  selectSingleItem,
+  updatePassword,
+} from '../../features/vault/vaultSlice';
+import PasswordPopup from '../../components/password-popup';
+import { useParams } from 'react-router-dom';
+import {
+  fetchCompanyById,
+  selectSingleItem as selectCompany,
+} from '../../features/company/companySlice';
+
+const allowedPageSizes = [8, 12, 20];
+
+function handleErrors(response) {
+  if (!response.ok) {
+    throw Error(response.statusText);
+  }
+  return response;
+}
+
+const Accounts = () => {
+  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
+  const [requestStatus, setRequestStatus] = useState('idle');
+  const [isPopupVisible, setPopupVisibility] = useState(false);
+  const [isAddPopupVisible, setAddPopupVisibility] = useState(false);
+  const [loadPannelVisible, setLoadPannelVisible] = useState(false);
+  const [pass, setPass] = useState({});
+  const [passwords, setPasswords] = useState([]);
+
+  const vault = useSelector(selectVault);
+  const passwordItem = useSelector(selectSingleItem);
+  const { name } = useSelector(selectCompany);
+  const dispatch = useDispatch();
+
+  let params = useParams();
+
+  useEffect(() => {
+    const Id = params.accountId;
+    dispatch(fetchCompanyById({ Id })).unwrap();
+    const filteredPass = vault.filter((item) => item.companyID === Number(Id));
+    setPasswords(filteredPass);
+  }, [params.accountId, vault]);
+
+  useEffect(() => {
+    setPass(passwordItem);
+    dispatch(setPasswordMode('password'));
+    if (Object.keys(passwordItem).length !== 0) {
+      setLoadPannelVisible(false);
+    }
+  }, [passwordItem]);
+
+  const handleTitleClick = (Id) => {
+    togglePopup();
+    dispatch(fetchPasswordById({ Id })).unwrap();
+    setLoadPannelVisible(true);
+  };
+
+  const togglePopup = () => {
+    setPopupVisibility(!isPopupVisible);
+  };
+
+  const toggleAddPopup = () => {
+    setAddPopupVisibility(!isAddPopupVisible);
+  };
+
+  const customDataSource = new CustomStore({
+    key: 'id',
+    load: () => {
+      return passwords;
+    },
+
+    insert: (values) => {
+      return addPassword(values);
+    },
+
+    remove: (key) => {
+      return deleteRecordByID(key);
+    },
+
+    update: (key, values) => {
+      return editPassword({ ...values, id: key });
+    },
+  });
+
+  const selectionChanged = (data) => {
+    setSelectedItemKeys(data.selectedRowKeys);
+  };
+
+  const deleteRecordByID = (Id) => {
+    if (requestStatus === 'idle') {
+      try {
+        setRequestStatus('pending');
+        dispatch(deletePassword({ Id })).unwrap();
+      } catch (err) {
+        alert('Failed to delete the password: ' + err);
+      } finally {
+        setRequestStatus('idle');
+      }
+    }
+  };
+
+  const deleteRecords = () => {
+    selectedItemKeys.forEach((Id) => {
+      deleteRecordByID(Id);
+    });
+  };
+
+  const addPassword = (data) => {
+    if (requestStatus === 'idle') {
+      try {
+        setRequestStatus('pending');
+        dispatch(addNewPassword(data)).unwrap();
+      } catch (err) {
+        alert('Failed to save the company: ' + err);
+      } finally {
+        setRequestStatus('idle');
+      }
+    }
+  };
+
+  const editPassword = (data) => {
+    if (requestStatus === 'idle') {
+      try {
+        setRequestStatus('pending');
+        dispatch(updatePassword(data)).unwrap();
+      } catch (err) {
+        alert('Failed to save the password: ' + err);
+      } finally {
+        setRequestStatus('idle');
+      }
+    }
+  };
+
+  const onEditHandler = (data) => {
+    editPassword(data);
+    togglePopup();
+  };
+
+  const onAddHandler = (data) => {
+    addPassword(data);
+    toggleAddPopup();
+  };
+
+  const renderGridCell = (data) => {
+    return (
+      <div className='item-title' onClick={() => handleTitleClick(data.key)}>
+        {data.text}
+      </div>
+    );
+  };
+
+  return (
+    <React.Fragment>
+      <h2 className={'content-block'}>{name}</h2>
+      <div className={'content-block'}>
+        <div className={'dx-card responsive-paddings'}>
+          <DataGrid
+            dataSource={customDataSource}
+            // keyExpr='id'
+            showBorders={true}
+            allowColumnResizing={true}
+            columnAutoWidth={true}
+            selectedRowKeys={selectedItemKeys}
+            onSelectionChanged={selectionChanged}
+          >
+            <Selection mode='multiple' />
+            <Editing
+              mode='form'
+              useIcons={true}
+              // allowUpdating={true}
+              // allowAdding={true}
+              allowDeleting={true}
+            />
+
+            <Column
+              dataField='title'
+              caption='Title'
+              cellRender={renderGridCell}
+            />
+            <Column dataField='username' caption='Name' />
+
+            <Column dataField='url' caption='URL' />
+
+            <Column dataField='password' caption='Password' visible={false} />
+
+            {/* <Column dataField='companyName' caption='Company' /> */}
+            <Toolbar>
+              <Item location='after'>
+                <Button
+                  onClick={deleteRecords}
+                  icon='trash'
+                  disabled={!selectedItemKeys.length}
+                  text='Delete Selected Records'
+                />
+              </Item>
+            </Toolbar>
+
+            <Paging defaultPageSize={12} />
+            <Pager
+              showPageSizeSelector={true}
+              allowedPageSizes={allowedPageSizes}
+            />
+          </DataGrid>
+        </div>
+      </div>
+
+      <LoadPanel
+        shadingColor='rgba(0,0,0,0.4)'
+        position={{ of: '.dx-card' }}
+        visible={loadPannelVisible}
+        showIndicator={true}
+        shading={true}
+        showPane={true}
+        closeOnOutsideClick={false}
+      />
+      {!loadPannelVisible && (
+        <PasswordPopup
+          visble={isPopupVisible}
+          togglePopup={togglePopup}
+          onSubmitHandler={onEditHandler}
+          formTitle={'Edit Password'}
+          password={pass}
+          setPassword={setPass}
+        />
+      )}
+
+      <PasswordPopup
+        visble={isAddPopupVisible}
+        togglePopup={toggleAddPopup}
+        onSubmitHandler={onAddHandler}
+        formTitle={'Add Password'}
+        password={pass}
+        setPassword={setPass}
+      />
+    </React.Fragment>
+  );
+};
+
+export default Accounts;
