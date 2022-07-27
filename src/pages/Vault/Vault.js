@@ -28,7 +28,7 @@ import { selectCompanies } from '../../features/company/companySlice';
 
 const allowedPageSizes = [8, 12, 20];
 
-const Profile = () => {
+const Vault = () => {
   const [selectedItemKeys, setSelectedItemKeys] = useState([]);
   const [requestStatus, setRequestStatus] = useState('idle');
   const [isPopupVisible, setPopupVisibility] = useState(false);
