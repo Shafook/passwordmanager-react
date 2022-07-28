@@ -39,7 +39,10 @@ export const addNewCompany = createAsyncThunk(
   'companies/addNewCompany',
   async (initialState) => {
     try {
-      const response = await axios.post(COMPANY_URL, initialState);
+      const response = await axios.post(
+        `${COMPANY_URL}/AccountType`,
+        initialState
+      );
       return response.data;
     } catch (err) {
       return err.message;
@@ -67,6 +70,18 @@ export const deleteCompany = createAsyncThunk(
     try {
       const response = await axios.delete(`${COMPANY_URL}/${Id}`);
       if (response?.status === 204) return initialState;
+      return response.data;
+    } catch (err) {
+      return err.message;
+    }
+  }
+);
+
+export const addCompanyAccountType = createAsyncThunk(
+  'companies/addCompanyAccountType',
+  async (initialState) => {
+    try {
+      const response = await axios.post(COMPANY_URL, initialState);
       return response.data;
     } catch (err) {
       return err.message;
@@ -134,6 +149,9 @@ const companySlice = createSlice({
           (company) => company.id !== id
         );
         state.companies = companies;
+      })
+      .addCase(addCompanyAccountType.fulfilled, (state, action) => {
+        state.status = 'succeeded';
       });
   },
 });
