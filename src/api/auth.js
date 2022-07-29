@@ -82,7 +82,7 @@ export async function createAccount(
 ) {
   try {
     // Send request
-    await axios.post(`${AUTH_URL}/register`, {
+    const result = await axios.post(`${AUTH_URL}/register`, {
       email,
       password,
       firstName,
@@ -93,6 +93,8 @@ export async function createAccount(
 
     return {
       isOk: true,
+      message: result.message,
+      status: result.status,
     };
   } catch {
     return {

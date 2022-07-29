@@ -38,9 +38,7 @@ export default function CreateAccountForm(props) {
       );
       setLoading(false);
 
-      console.log(result);
-
-      if (result.status === 'Success') {
+      if (result.isOk) {
         history.push('/login');
       } else {
         notify(result.message, 'error', 2000);
