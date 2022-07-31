@@ -39,10 +39,7 @@ export const addNewCompany = createAsyncThunk(
   'companies/addNewCompany',
   async (initialState) => {
     try {
-      const response = await axios.post(
-        `${COMPANY_URL}/AccountType`,
-        initialState
-      );
+      const response = await axios.post(COMPANY_URL, initialState);
       return response.data;
     } catch (err) {
       return err.message;
@@ -81,7 +78,10 @@ export const addCompanyAccountType = createAsyncThunk(
   'companies/addCompanyAccountType',
   async (initialState) => {
     try {
-      const response = await axios.post(COMPANY_URL, initialState);
+      const response = await axios.post(
+        `${COMPANY_URL}/AccountType`,
+        initialState
+      );
       return response.data;
     } catch (err) {
       return err.message;
