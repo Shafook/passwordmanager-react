@@ -1,36 +1,35 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import Popup from 'devextreme-react/popup';
 import { resetSingleItem } from '../../features/vault/vaultSlice';
 import { useDispatch } from 'react-redux';
-import PasswordForm from '../password-form';
 import { addPassword } from '../../features/form/formSlice';
+import PasswordFormNew from '../password-form-new';
 
-const PasswordPopup = ({
+const PasswordPopupNew = ({
+  Id,
   visble,
   togglePopup,
   onSubmitHandler,
   formTitle,
   newpassword,
+  setPassword,
   isNew,
 }) => {
   const dispatch = useDispatch();
-
-  const passRef = useRef(null);
 
   const handleToggle = () => {
     togglePopup();
     dispatch(resetSingleItem());
     dispatch(addPassword({}));
-    passRef.current.reset();
   };
+
+  const onShowing = () => {};
 
   const renderContent = () => {
     return (
-      <PasswordForm
-        ref={passRef}
+      <PasswordFormNew
         newpassword={newpassword}
         onSubmitHandler={onSubmitHandler}
-        isNew={isNew}
       />
     );
   };
@@ -41,6 +40,7 @@ const PasswordPopup = ({
       visible={visble}
       closeOnOutsideClick={true}
       onHiding={handleToggle}
+      onShowing={onShowing}
       showTitle={true}
       title={formTitle}
       width={500}
@@ -51,4 +51,4 @@ const PasswordPopup = ({
   );
 };
 
-export default PasswordPopup;
+export default PasswordPopupNew;

@@ -21,10 +21,15 @@ import {
   updatePassword,
 } from '../../features/vault/vaultSlice';
 import PasswordPopup from '../../components/password-popup';
-import { setPasswordMode } from '../../features/form/formSlice';
+import {
+  setPasswordMode,
+  addPassword as newPass,
+  selectPassword,
+} from '../../features/form/formSlice';
 import { Link } from 'react-router-dom';
 import './Vault.scss';
 import { selectCompanies } from '../../features/company/companySlice';
+import PasswordPopupNew from '../../components/password-popup-new';
 
 const allowedPageSizes = [8, 12, 20];
 
@@ -39,14 +44,16 @@ const Vault = () => {
   const vault = useSelector(selectVault);
   const companies = useSelector(selectCompanies);
   const passwordItem = useSelector(selectSingleItem);
+  const password = useSelector(selectPassword);
   const dispatch = useDispatch();
 
   useEffect(() => {
     setPass(passwordItem);
-    dispatch(setPasswordMode('password'));
+    dispatch(newPass(passwordItem));
     if (Object.keys(passwordItem).length !== 0) {
       setLoadPannelVisible(false);
     }
+    dispatch(setPasswordMode('password'));
   }, [passwordItem]);
 
   const handleTitleClick = (Id) => {
@@ -60,6 +67,7 @@ const Vault = () => {
   };
 
   const toggleAddPopup = () => {
+    setPass(null);
     setAddPopupVisibility(!isAddPopupVisible);
   };
 
@@ -250,8 +258,9 @@ const Vault = () => {
           togglePopup={togglePopup}
           onSubmitHandler={onEditHandler}
           formTitle={'Edit Password'}
-          password={pass}
+          newpassword={pass}
           setPassword={setPass}
+          isNew={false}
         />
       )}
 
@@ -260,8 +269,9 @@ const Vault = () => {
         togglePopup={toggleAddPopup}
         onSubmitHandler={onAddHandler}
         formTitle={'Add Password'}
-        password={pass}
+        newpassword={pass}
         setPassword={setPass}
+        isNew={true}
       />
     </React.Fragment>
   );
